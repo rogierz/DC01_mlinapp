@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.keras.applications.mobilenet_v3 import MobileNetV3
 
 class ConvBlock(tf.keras.layers.Layer):
     KERNEL_SIZE = 3
@@ -74,31 +75,34 @@ class Generator(tf.keras.Model):
         return x
 
 class Discriminator(tf.keras.Model):
-    def __init__(self, name="discriminator", **kwargs):
-        super(Discriminator, self).__init__(name=name, **kwargs)
 
+    def __init__(self, input_shape=(1024, 800, 1), **kwargs):
+        super(Discriminator, self).__init__(**kwargs)
+        self.base_model = MobileNetV3(include_top=False, weights=None, input_shape=input_shape)
+        self.result = tf.keras.layers.Conv2D(1, 1, padding="same", activation="sigmoid")
 
+    def call(self, inputs):
+        if type(inputs) is tuple:
+            inputs = tf.concat(inputs, axis=-1)
+
+        x = self.base_model(inputs)
+        x = self.result(x)
+        return x
 class GAN(tf.keras.Model):
     def __init__(
         self,
-        name="unet",
-        num_classes=5,
-        input_shape=(256, 256),
+        name="gan",
+        input_shape=(1024, 800, 1),
         **kwargs
     ):
         super(GAN, self).__init__(name=name,**kwargs)
-        self.num_classes = num_classes
-        
+        self.generator = Generator()
+        self.discriminator = Discriminator()
+
+    def train_step(self, inputs):
+        # TODO
+        return 0
 
     def call(self, inputs):
-        x1 = self.encode_1(inputs)
-        x2 = self.encode_2(x1)
-        x3 = self.encode_3(x2)
-        x4 = self.encode_4(x3)
-        x = self.latent(x4)
-        x = self.decode_4((x, x4))
-        x = self.decode_3((x, x3))
-        x = self.decode_2((x, x2))
-        x = self.decode_1((x, x1))
-        x = self.result(x)
-        return x
+        # TODO
+        return {}
