@@ -1,10 +1,11 @@
 | Cose da fare                                 | Data scadenza | Assegnatario | Note | Status (TODO/WIP/DONE) |
 | :------------------------------------------- | :-----------: | :----------: | :--: | :--------------------: |
-| Implementare GAN                             |               |              |      |          TODO          |
+| Implementare GAN                             |               |              |      |          WIP           |
 | Dividere il dataset in train/val/test        |               |              |      |          TODO          |
 | Rivedere le label                            |               |              |      |          TODO          |
 | Creare environment su legion                 |               |              |      |          TODO          |
-| Creare callback sui modelli                  |               |              |      |          TODO          |
+| Creare callback sui modelli                  |               |              |      |          DONE          |
+| Definire preprocess del dataset              |               |              |      |          TODO          |
 | Pipeline di data augmentation                |               |              |      |          TODO          |
 | Implementare training                        |               |              |      |          TODO          |
 | Visualizzazione maschere training/validation |               |              |      |          TODO          |
