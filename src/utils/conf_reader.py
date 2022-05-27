@@ -1,6 +1,6 @@
 import json
 import tensorflow as tf
-from losses import LOSSES
+from utils.losses import LOSSES
 
 OPTIMIZERS = {
     'adam':tf.keras.optimizers.Adam,

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.applications.mobilenet_v3 import MobileNetV3
+from tensorflow.keras.applications import MobileNetV3Small
 
 class ConvBlock(tf.keras.layers.Layer):
     KERNEL_SIZE = 3
@@ -88,11 +88,12 @@ class Discriminator(tf.keras.Model):
         x = self.base_model(inputs)
         x = self.result(x)
         return x
+
 class GAN(tf.keras.Model):
     def __init__(
         self,
         name="gan",
-        input_shape=(1024, 800, 1),
+        # input_shape=(1024, 800, 1),
         **kwargs
     ):
         super(GAN, self).__init__(name=name,**kwargs)
@@ -100,9 +101,36 @@ class GAN(tf.keras.Model):
         self.discriminator = Discriminator()
 
     def train_step(self, inputs):
-        # TODO
-        return 0
+        inputs_with_defects = inputs    # TODO add function to insert defects
+        # train the discriminator
+        with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+            y_true_pred = self.discriminator(inputs, training=True)
+            gen_images = self.generator(inputs_with_defects, training=True)
+            y_fake_pred = self.discriminator(gen_images, training=True)
+
+            y_true = tf.ones_like(y_true_pred)
+            y_fake = tf.zeros_like(y_fake_pred)
+
+            # (the loss function is configured in compile())
+            loss_d = self.loss['discriminator'](tf.concat(y_true, y_fake), tf.concat(y_true_pred, y_fake_pred), regularization_losses=self.losses)
+            loss_g = self.loss['generator'](y_true, y_fake_pred, regularization_losses=self.losses)
+            loss = tf.reduce_sum(loss_g, 0.5 * loss_d)
+
+        # compute gradients
+        gen_gradients = gen_tape.gradient(loss_g, self.generator.trainable_variables)
+        disc_gradients = disc_tape.gradient(loss_d, self.discriminator.trainable_variables)
+
+        # apply gradients
+        # (the optimizer should be configured in compile())
+        self.optimizer['generator'].apply_gradients(zip(gen_gradients, self.generator.trainable_variables))
+        self.optimizer['discriminator'].apply_gradients(zip(disc_gradients, self.discriminator.trainable_variables))
+
+        # compute metrics
+        out = {m.name: m.result() for m in self.metrics}
+        out['loss'] = loss
+        return out
 
     def call(self, inputs):
-        # TODO
-        return {}
+        gen_out = self.generator(inputs)
+        disc_out = self.discriminator(gen_out)
+        return [gen_out, disc_out]
