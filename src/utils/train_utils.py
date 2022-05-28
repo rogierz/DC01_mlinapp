@@ -17,8 +17,8 @@ class TrainWrapper():
             )
 
     def train(self, weights_path='./checkpoint/checkpoint.tf'):
-        if not os.path.isdir(os.path.dirname(weights_path)):
-            os.makedirs(os.path.dirname(weights_path))
+        # if not os.path.isdir(os.path.dirname(weights_path)):
+        #     os.makedirs(os.path.dirname(weights_path))
 
         # define the callback
         checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
