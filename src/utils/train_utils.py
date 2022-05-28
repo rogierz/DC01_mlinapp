@@ -5,9 +5,9 @@ class TrainWrapper():
     def __init__(self, model, conf, train_dataset, val_dataset, test_dataset):
         self.net = model
         self.conf = conf
-        self.train_ds = train_dataset
-        self.val_ds = val_dataset
-        self.test_ds = test_dataset
+        self.train_ds = train_dataset.batch(conf['batch_size'])
+        self.val_ds = val_dataset.batch(conf['batch_size'])
+        self.test_ds = test_dataset.batch(conf['batch_size'])
 
     def compile_model(self):
         self.net.compile(

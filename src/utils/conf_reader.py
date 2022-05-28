@@ -42,8 +42,8 @@ def read_conf(filename):
         conf['epochs'] = int(conf['epochs'])
 
     if not 'loss' in conf:
-        conf['loss'] = LOSSES['cross_entropy']
+        conf['loss'] = LOSSES['binary_crossentropy']()
     else:
-        conf['loss'] = LOSSES[conf['loss']]
+        conf['loss'] = LOSSES[conf['loss']]()
 
     return conf

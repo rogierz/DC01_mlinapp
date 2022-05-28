@@ -46,7 +46,7 @@ class UNet(tf.keras.Model):
     def __init__(
         self,
         name="unet",
-        num_classes=5,
+        num_classes=6,
         input_shape=(256, 256),
         **kwargs
     ):
