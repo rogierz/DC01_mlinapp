@@ -99,6 +99,17 @@ class GAN(tf.keras.Model):
         super(GAN, self).__init__(name=name,**kwargs)
         self.generator = Generator()
         self.discriminator = Discriminator()
+        self.optimizer = {}
+        self.loss = {}
+
+    def compile(self, d_optimizer, g_optimizer, d_loss_fn, g_loss_fn=None):
+        super(GAN, self).compile()
+        self.optimizer['discriminator'] = d_optimizer
+        self.optimizer['generator'] = g_optimizer
+        self.loss['discriminator'] = d_loss_fn
+        self.loss['generator'] = d_loss_fn
+        if g_loss_fn is not None:
+            self.loss['generator'] = g_loss_fn
 
     def train_step(self, inputs):
         inputs_with_defects = inputs    # TODO add function to insert defects
@@ -112,8 +123,12 @@ class GAN(tf.keras.Model):
             y_fake = tf.zeros_like(y_fake_pred)
 
             # (the loss function is configured in compile())
-            loss_d = self.loss['discriminator'](tf.concat(y_true, y_fake), tf.concat(y_true_pred, y_fake_pred), regularization_losses=self.losses)
-            loss_g = self.loss['generator'](y_true, y_fake_pred, regularization_losses=self.losses)
+            y_all = tf.concat(y_true, y_fake)
+            # Add random noise to the labels - important trick!
+            # y_all += 0.05 * tf.random.uniform(tf.shape(labels))
+            
+            loss_d = self.loss['discriminator'](y_all, tf.concat(y_true_pred, y_fake_pred))
+            loss_g = self.loss['generator'](y_true, y_fake_pred)
             loss = tf.reduce_sum(loss_g, 0.5 * loss_d)
 
         # compute gradients
@@ -128,6 +143,8 @@ class GAN(tf.keras.Model):
         # compute metrics
         out = {m.name: m.result() for m in self.metrics}
         out['loss'] = loss
+        out['d_loss'] = loss_d
+        out['g_loss'] = loss_g
         return out
 
     def call(self, inputs):
