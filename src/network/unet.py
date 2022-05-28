@@ -63,7 +63,7 @@ class UNet(tf.keras.Model):
         self.decode_3 = ConvBlock(filters=256, with_upsample=True)
         self.decode_2 = ConvBlock(filters=128, with_upsample=True)
         self.decode_1 = ConvBlock(filters=64, with_upsample=True)
-        self.result = tf.keras.layers.Conv2D(self.num_classes, 1, padding="same")
+        self.result = tf.keras.layers.Conv2D(self.num_classes, 1, activation='sigmoid', padding="same")
 
     def call(self, inputs):
         x1 = self.encode_1(inputs)
