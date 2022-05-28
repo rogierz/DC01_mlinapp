@@ -4,6 +4,7 @@ from glob import glob
 import os
 import numpy as np
 from PIL import Image, ImageDraw
+from utils.visualize import apply_mask_on_image
 
 REQUIRED_FOLDERS = ['Defects', 'NoDefects', 'annotations']
 
@@ -20,17 +21,17 @@ all_defects = []
 
 def map_fn(file:str, save_defects=False):
     # load image
-    img = tf.keras.utils.load_img(file)
+    img = Image.open(file)
     shape = img.size
     # build labels
-    label = np.zeros((shape[0], shape[1]))
+    label = np.zeros((shape[1], shape[0]))
     if 'NoDefects' not in file:
         # load file
         annotation_file = file.replace('Defects', 'annotations').replace('jpg', 'json')
         with open(annotation_file, 'r') as f:
             annotations = json.load(f)
         # build annotation image & draw poligons
-        img = Image.fromarray(label)
+        label_img = Image.fromarray(label)
         for shape in annotations['shapes']:
             # use only one label name
             if shape['label'].upper() == 'VERTICAL DEFECT':
@@ -44,11 +45,16 @@ def map_fn(file:str, save_defects=False):
             if save_defects:
                 all_defects.append((label_id, points))
             # draw poligon on image
-            ImageDraw.Draw(img).polygon(points, fill=label_id)
-        label = np.array(img)
+            ImageDraw.Draw(label_img).polygon(points, fill=label_id)
+        label = np.array(label_img, dtype=np.uint8)
     label = tf.one_hot(label, len(LABEL_DICT))
     return (img, label)
     
+def make_dataset(tuples):
+    x = [tf.convert_to_tensor(t[0]) for t in tuples]
+    y = [t[1] for t in tuples]
+
+    return tf.data.Dataset.from_tensor_slices((x, y))
 
 class AMDdataset():
     '''Additive Manufactoring dataset class'''
@@ -85,3 +91,10 @@ class AMDdataset():
         test = [map_fn(x) for x in test]
         val = [map_fn(x, True) for x in val]
 
+        # img, mask = train[0]
+        # apply_mask_on_image(img, mask, "../visualize")
+
+        # build the datasets
+        self.train = make_dataset(train)
+        self.test = make_dataset(test)
+        self.val = make_dataset(val)
