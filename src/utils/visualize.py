@@ -8,11 +8,11 @@ import tensorflow as tf
 def apply_mask_on_image(img, mask, out_path):
     # convert img type (if necessary)
     if not isinstance(img, (Image.Image)):
-        img = tf.keras.utils.array_to_img(img)
+        img = tf.keras.utils.array_to_img(tf.cast(img[0] * 255.0, dtype=tf.uint8))
     
     # convert mask type (if necessary)
     if not isinstance(mask, (np.ndarray, np.generic) ):
-        single_ch_mask = mask.numpy().copy()
+        single_ch_mask = mask[0].numpy().copy()
     else:
         single_ch_mask = mask.copy()
 

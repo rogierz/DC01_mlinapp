@@ -51,7 +51,7 @@ def map_fn(file:str, save_defects=False):
     return (img, label)
     
 def make_dataset(tuples):
-    x = [tf.cast(tf.convert_to_tensor(np.array(t[0]).reshape((t[0].size[1],t[0].size[0], 1))), tf.float32) / 255.0 for t in tuples]
+    x = [tf.cast(tf.convert_to_tensor(np.array(t[0].convert('RGB')).reshape((t[0].size[1],t[0].size[0], 3))), tf.float32) / 255.0 for t in tuples]
     y = [t[1] for t in tuples]
 
     return tf.data.Dataset.from_tensor_slices((x, y))
@@ -89,11 +89,8 @@ class AMDdataset():
         train = [map_fn(x, True) for x in train]
         test = [map_fn(x) for x in test] 
         val = [map_fn(x, True) for x in val] 
-        apply_mask_on_image(train[0][0], train[0][1], '../visualize')
 
         # build the datasets
         self.train = make_dataset(train)
         self.test = make_dataset(test)
         self.val = make_dataset(val)
-
-        el = self.train.take(1).as_numpy_iterator().next()

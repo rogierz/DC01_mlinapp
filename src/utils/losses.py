@@ -18,5 +18,6 @@ class DiceLoss(tf.keras.losses.Loss):
 LOSSES = {
     'dice':DiceLoss,
     'categorical_cross_entropy':tf.keras.losses.CategoricalCrossentropy,
-    'binary_crossentropy':tf.keras.losses.BinaryCrossentropy
+    'binary_crossentropy':tf.keras.losses.BinaryCrossentropy,
+    'giou':lambda:'giou'
 }

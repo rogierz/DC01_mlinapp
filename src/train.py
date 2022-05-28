@@ -8,7 +8,7 @@ from network.gan import GAN
 from utils.train_utils import TrainWrapper
 from utils.conf_reader import read_conf
 import numpy as np
-
+from utils.visualize import apply_mask_on_image
 
 MODELS={
     'unet':UNet,
@@ -29,10 +29,16 @@ if __name__ == '__main__':
     datasets.build()
     # define the model
     net = MODELS[args.model]()
+
     # train
     train_wrapper = TrainWrapper(net, conf=conf, train_dataset=datasets.train, val_dataset=datasets.val, test_dataset=datasets.test)
 
     train_wrapper.train(args.weights_path)
 
     # evaluate
-    train_wrapper.evaluate(args.weigths_path)
+    train_wrapper.evaluate(args.weights_path)
+
+    # save some exapmples
+    for i, img in enumerate(datasets.test.batch(1).take(5)):
+        mask = net(img[0])
+        apply_mask_on_image(img[0], mask, f'../results/image_{i}')
