@@ -17,7 +17,7 @@ MODELS={
 
 if __name__ == '__main__':
     # make deterministic
-    np.random.seed(0)
+    np.random.seed(42)
     tf.keras.utils.set_random_seed(1)
     tf.config.experimental.enable_op_determinism()
     # parsing the arguments

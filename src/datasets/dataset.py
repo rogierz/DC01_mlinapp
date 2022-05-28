@@ -35,7 +35,7 @@ def map_fn(file:str, save_defects=False):
         for shape in annotations['shapes']:
             # use only one label name
             if shape['label'].upper() == 'VERTICAL DEFECT':
-                shape['label'] = 'VERTICAL'                
+                shape['label'] = 'VERTICAL'
             if shape['label'].upper() == 'SPATTING':
                 shape['label'] = 'SPATTERING'
 
@@ -57,7 +57,7 @@ def make_dataset(tuples):
     return tf.data.Dataset.from_tensor_slices((x, y))
 
 class AMDdataset():
-    '''Additive Manufactoring dataset class'''
+    """Additive Manufactoring dataset class"""
 
     def __init__(self, path, image_shape=(1280, 1024, 3)):
         self.path = path
@@ -70,7 +70,6 @@ class AMDdataset():
         if len(folders) != len(REQUIRED_FOLDERS):
             raise FileNotFoundError(f'Directory {self.path} does not contain correct folders. It must contains {REQUIRED_FOLDERS}')
         
-        # TODO split the dataset and load it into 3 tf.dataset: self.train, self.val, self.test
         train = []
         test = []
         val = []
@@ -80,19 +79,16 @@ class AMDdataset():
             files = np.array(glob(os.path.join(self.path, f,'*.jpg')))
             if len(files) == 0:
                 continue
-            n = len(files) // 3
+            n = len(files) // 9
             idx = np.random.permutation(np.arange(len(files)))
 
-            test.extend(files[idx[:n]])
-            val.extend(files[idx[n:n*2]])
-            train.extend(files[idx[n*2:]])
+            test.extend(files[idx[:3*n]]) # 3/9
+            val.extend(files[idx[3*n:5*n]]) # 2/9
+            train.extend(files[idx[5*n:]])  # 4/9
 
         train = [map_fn(x, True) for x in train]
-        test = [map_fn(x) for x in test]
-        val = [map_fn(x, True) for x in val]
-
-        # img, mask = train[0]
-        # apply_mask_on_image(img, mask, "../visualize")
+        test = [map_fn(x) for x in test] 
+        val = [map_fn(x, True) for x in val] 
 
         # build the datasets
         self.train = make_dataset(train)
