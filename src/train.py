@@ -29,16 +29,21 @@ if __name__ == '__main__':
     datasets.build()
     # define the model
     net = MODELS[args.model]()
-
     # train
     train_wrapper = TrainWrapper(net, conf=conf, train_dataset=datasets.train, val_dataset=datasets.val, test_dataset=datasets.test)
 
     train_wrapper.train(args.weights_path)
 
     # evaluate
-    train_wrapper.evaluate(None)#args.weights_path)
+    train_wrapper.evaluate(args.weights_path)
 
     # save some exapmples
-    for i, img in enumerate(datasets.test.batch(1).take(10)):
+    for i, img in enumerate(datasets.test.batch(1)):
         mask = net(img[0])
-        apply_mask_on_image(img[0], mask, f'../results/image_{i}', img[1])
+        apply_mask_on_image(img[0], mask, f'./results/test', img[1], i)
+    for i, img in enumerate(datasets.train.batch(1)):
+        mask = net(img[0])
+        apply_mask_on_image(img[0], mask, f'./results/train', img[1], i)
+    for i, img in enumerate(datasets.val.batch(1)):
+        mask = net(img[0])
+        apply_mask_on_image(img[0], mask, f'./results/val', img[1], i)

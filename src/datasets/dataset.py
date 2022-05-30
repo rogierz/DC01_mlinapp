@@ -23,9 +23,11 @@ def map_fn(file:str, save_defects=False):
     # load image
     img = Image.open(file)
     shape = img.size
+    # img = img.resize((256,256), 0)
     # build labels
-    label = np.zeros((shape[1], shape[0]))
+    label = np.zeros((img.size[1], img.size[0]))
     if 'NoDefects' not in file:
+        label = np.zeros((shape[1], shape[0]))
         # load file
         annotation_file = file.replace('Defects', 'annotations').replace('jpg', 'json')
         with open(annotation_file, 'r') as f:
@@ -33,12 +35,6 @@ def map_fn(file:str, save_defects=False):
         # build annotation image & draw poligons
         label_img = Image.fromarray(label)
         for shape in annotations['shapes']:
-            # use only one label name
-            #if shape['label'].upper() == 'VERTICAL DEFECT':
-            #    shape['label'] = 'VERTICAL'
-            #if shape['label'].upper() == 'SPATTING':
-            #    shape['label'] = 'SPATTERING'
-
             points = [(x[0], x[1]) for x in shape['points']]
             label_id = LABEL_DICT[shape['label'].upper()]
             # append defects to all defects
@@ -46,12 +42,13 @@ def map_fn(file:str, save_defects=False):
                 all_defects.append((label_id, points))
             # draw poligon on image
             ImageDraw.Draw(label_img).polygon(points, fill=label_id)
+        # label = np.array(label_img.resize((256,256), 0), dtype=np.uint8)
         label = np.array(label_img, dtype=np.uint8)
     label = tf.one_hot(label, len(LABEL_DICT))
     return (img, label)
     
 def make_dataset(tuples):
-    x = [tf.cast(tf.convert_to_tensor(np.array(t[0].convert('RGB')).reshape((t[0].size[1],t[0].size[0], 3))), tf.float32) / 255.0 for t in tuples]
+    x = [tf.cast(tf.convert_to_tensor(np.array(t[0]).reshape((t[0].size[1],t[0].size[0], 1))), tf.float32) / 255.0 for t in tuples]
     y = [t[1] for t in tuples]
 
     return tf.data.Dataset.from_tensor_slices((x, y))

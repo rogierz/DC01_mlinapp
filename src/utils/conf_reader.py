@@ -8,7 +8,10 @@ OPTIMIZERS = {
 }
 
 METRICS = {
-    'mIoU':tf.keras.metrics.MeanIoU(6)
+    'mIoU':tf.keras.metrics.MeanIoU(6),
+    'oneHotIoU':tf.keras.metrics.OneHotIoU(6, range(6)),
+    'oneHotMeanIoU':tf.keras.metrics.OneHotMeanIoU(6),
+    'mse':tf.keras.metrics.MeanSquaredError()
 }
 
 def read_conf(filename):
@@ -42,7 +45,7 @@ def read_conf(filename):
         conf['epochs'] = int(conf['epochs'])
 
     if not 'loss' in conf:
-        conf['loss'] = LOSSES['binary_crossentropy']()
+        conf['loss'] = LOSSES['categorical_cross_entropy']()
     else:
         conf['loss'] = LOSSES[conf['loss']]()
 
