@@ -5,5 +5,11 @@
     "optimizer":"adam",
     "metrics":["mIoU", "oneHotIoU", "mse", "oneHotMeanIoU"],
     "loss":"focal",
-    "monitor_metric":"val_one_hot_mean_io_u"
+    "monitor_metric":"val_one_hot_mean_io_u",
+    "augmentation":{
+        "toGray":1,
+        "horizontalFlip":1,
+        "verticalFlip":1,
+        "clahe":1
+    }
 }
